@@ -1,5 +1,9 @@
 using System.Reflection.Metadata;
 using System.Runtime.Intrinsics.Arm;
+using Application.DTOs;
+using Application.Interfaces;
+using Application.Services;
+using Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,33 +12,39 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite("Data Source=app.db"));
+
+builder.Services.AddScoped<IProdutoRepository, ProdutoRepository>();
+
+builder.Services.AddScoped<IProdutoService, ProdutoService>();
+
+
 var app = builder.Build();
 
 //Get Listar todos os produtos.
-app.MapGet("/produtos", (AppDbContext db) =>
+app.MapGet("/produtos", async (IProdutoService service, CancellationToken ct) =>
 {
-    return Results.Ok(db.Produtos.ToList());
+    var produtos = await service.ListarAsync(ct);
+    return Results.Ok(produtos);
 });
 // Get que busca por id.
-app.MapGet("/produtos/{id}", (int id, AppDbContext db) =>
+app.MapGet("/produtos/{id}", async (int id, IProdutoService service, CancellationToken ct) =>
 {
-    var produto = db.Produtos.Find(id);
+    var produto = await service.ObterAsync(id, ct);
     return produto != null ? Results.Ok(produto) : Results.NotFound();
 });
 //post criar produto
-app.MapPost("/produtos", (Produto produto, AppDbContext db) =>
+app.MapPost("/produtos", async (ProdutoCreateDto dto, IProdutoService service, CancellationToken ct) =>
 {
-    db.Produtos.Add(produto);
-    db.SaveChanges();
+    var produto = await service.CriarAsync(dto.Nome, dto.Descricao, dto.Preco, dto.Estoque, ct);
     return Results.Created($"/produtos/{produto.Id}", produto);
 });
 // Delete produto
-app.MapDelete("/produtos/{id}", (int id, AppDbContext db) =>
+app.MapDelete("/produtos/{id}", async (int id, IProdutoService service, CancellationToken ct) =>
 {
-    var produto = db.Produtos.Find(id);
-    if (produto == null) return Results.NotFound();
-    db.Produtos.Remove(produto);
-    db.SaveChanges();
+    var removido = await service.RemoverAsync(id, ct);
+    if (!removido)
+        return Results.NotFound();
+
     return Results.NoContent();
 });
 // Configure the HTTP request pipeline.

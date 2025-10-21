@@ -1,6 +1,7 @@
 using Application.Interfaces;
 using Domain.Entities;
 using Application.Services;
+using Application.DTOs;
 
 namespace Application.Services;
 
@@ -22,14 +23,20 @@ public class ProdutoService : IProdutoService
         return await _repo.GetAllAsync(ct);
     }
 
-    public async Task<Produto?> ObterAsync(int id, CancellationToken ct = default)
+    public async Task<ProdutoReadDto?> ObterAsync(int id, CancellationToken ct = default)
     {
         if (id <= 0)
         {
             throw new ArgumentException("O Id do produto deve ser maior que zero.", nameof(id));
         }
-        
-        return await _repo.GetByIdAsync(id, ct);
+
+        var produto = await _repo.GetByIdAsync(id, ct);
+        if(produto == null)
+        {
+            throw new ArgumentException("Ppoduto não encontrado");
+        }
+        var produtoDTO = MappingExtensions.ToReadDto(produto);
+        return produtoDTO;
     }
 
     public async Task<Produto> CriarAsync(string nome, string descricao, decimal preco, int estoque, CancellationToken ct = default)
