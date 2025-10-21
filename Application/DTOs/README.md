@@ -22,3 +22,33 @@ Objetivo: Introduzir DTOs para desacoplar o modelo de domínio/entidade EF da re
 - Branch: `feature/dto-mapping`
 - Atualizar README explicando decisões.
 - Pelo menos um teste de mapping (opcional).
+Decisões do Grupo DTO
+Estrutura e Padrões
+
+Os DTOs foram implementados como record para garantir imutabilidade e comparação por valor, evitando efeitos colaterais.
+
+O padrão de nomenclatura adotado foi PascalCase, conforme convenção do C#.
+
+A serialização JSON aplica camelCase automaticamente via JsonNamingPolicy.CamelCase no Program.cs.
+
+Cada DTO é puro, sem lógica de negócio, servindo apenas como contrato de transporte de dados entre camadas.
+
+ProdutoReadDto
+
+Inclui campos principais da entidade Produto e um campo calculado ValorEstoque, mapeado a partir de Preco * Estoque no MappingExtensions.
+
+Campo ValorEstoque é opcional (decimal?) e não armazenado no banco, servindo apenas para exibição.
+
+ProdutoCreateDto
+
+Usado para criação de produtos, contendo apenas os campos necessários à operação (Nome, Descricao, Preco, Estoque).
+
+Mantém o princípio de segregação de DTOs: criação (CreateDto) e leitura (ReadDto) possuem contratos independentes.
+
+Boas Práticas
+
+Evitar inflar DTOs com campos desnecessários.
+
+O mapeamento segue o fluxo entidade → DTO de leitura.
+
+Comentários TODO foram mantidos para apoiar revisões futuras e padronização do grupo.
