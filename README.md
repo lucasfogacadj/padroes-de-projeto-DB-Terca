@@ -19,26 +19,78 @@ Este repositório está preparado para o trabalho em grupo. A base é uma API mi
 
 (Se não houver grupo para Validation ainda, ficará como extra.)
 
+## Status dos Grupos
+| Grupo | Status | Branch | Observações |
+|-------|--------|--------|-------------|
+| 1 - Repository | ⏳ Pendente | - | Aguardando implementação |
+| 2 - Service | ✅ Concluído | `feature/service` | Implementado com validações |
+| 3 - DTO + Mapping | ⏳ Pendente | - | Aguardando implementação |
+| 4 - Validation | ⏳ Pendente | - | Aguardando implementação |
+| 5 - Factory | ⏳ Pendente | - | Aguardando implementação |
+
+## Implementação do Service Pattern (Grupo 2)
+
+### ✅ O que foi implementado
+- **ProdutoService**: Classe que centraliza regras de negócio
+- **Métodos implementados**:
+  - `ListarAsync()` - Lista todos os produtos
+  - `ObterAsync(int id)` - Busca produto por ID com validação
+  - `CriarAsync(...)` - Cria produto com validações de negócio
+  - `RemoverAsync(int id)` - Remove produto com validação de existência
+
+### 🎯 Decisões técnicas tomadas
+
+#### **Estratégia de Tratamento de Erros**
+- **ArgumentException** para parâmetros inválidos (ID ≤ 0, preço ≤ 0, estoque < 0)
+- **Return false** para operações que podem falhar (produto não encontrado)
+- **Justificativa**: Permite tratamento flexível pelo chamador sem forçar try/catch
+
+#### **Validações de Negócio Implementadas**
+- ✅ Nome não pode ser nulo ou vazio
+- ✅ Preço deve ser maior que zero
+- ✅ Estoque não pode ser negativo
+- ✅ ID deve ser maior que zero para operações de busca/remoção
+
+#### **Integração com Outros Grupos**
+- ✅ Usa `IProdutoRepository` (aguardando implementação do grupo Repository)
+- ✅ Usa `ProdutoFactory.Criar()` (aguardando implementação do grupo Factory)
+- ✅ Retorna entidade `Produto` (compatível com grupo DTO/Mapping)
+
+### 🤔 Quando NÃO usar Service Pattern
+- ❌ **Projetos muito simples**: Se não há regras de negócio complexas, pode ser overkill
+- ❌ **APIs puramente CRUD**: Se só faz persistência sem lógica, repository + controller é suficiente
+- ❌ **Microserviços muito pequenos**: Pode adicionar complexidade desnecessária
+
+### 📊 Trade-offs do Service Pattern
+- ✅ **Prós**: Código organizado, testável, reutilizável, centraliza regras
+- ❌ **Contras**: Adiciona uma camada extra (pode ser overkill para APIs simples)
+
+### 🔄 Próximos passos
+1. Integrar com `ProdutoRepository` quando implementado
+2. Integrar com `ProdutoFactory` quando implementado
+3. Coordenar com grupo DTO para retornar DTOs ao invés de entidades
+4. Adicionar testes unitários com mocks
+
 ## Ordem Sugerida de Integração
 1. Repository
-2. Service
+2. Service ✅
 3. Factory + DTO/Mapping (podem andar em paralelo se coordenados)
 4. Validation (após DTO pronto)
 
 ## Branch Naming
 `feature/<nome-padrao>` – exemplos:
 - `feature/repository`
-- `feature/service`
+- `feature/service` ✅
 - `feature/dto-mapping`
 - `feature/factory`
 - `feature/validation`
 
 ## Checklist de PR
-- [ ] Branch criada corretamente
-- [ ] Escopo único (apenas o padrão do grupo)
-- [ ] README da pasta atualizado/expandido
-- [ ] Código compila (`dotnet build`)
-- [ ] Explicação: Quando NÃO usar este padrão
+- [x] Branch criada corretamente
+- [x] Escopo único (apenas o padrão do grupo)
+- [x] README da pasta atualizado/expandido
+- [x] Código compila (`dotnet build`)
+- [x] Explicação: Quando NÃO usar este padrão
 - [ ] (Opcional) Teste simples
 - [ ] Endpoints ainda funcionam (quando integrados)
 
@@ -64,7 +116,7 @@ Este repositório está preparado para o trabalho em grupo. A base é uma API mi
 **Onde ficam validações?** Invariantes críticas podem estar na Factory; validações de entrada no Validator.
 
 
-Boa implementação! Lembrem-se de justificar escolhas, não só “fazer”.
+Boa implementação! Lembrem-se de justificar escolhas, não só "fazer".
 
 ---
 ### Documentação da Estrutura do Projeto

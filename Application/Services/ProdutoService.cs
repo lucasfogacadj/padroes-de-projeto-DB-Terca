@@ -1,4 +1,6 @@
 using Application.Interfaces;
+using Domain.Entities;
+using Application.Services;
 
 namespace Application.Services;
 
@@ -17,7 +19,7 @@ public class ProdutoService : IProdutoService
 
     public async Task<IEnumerable<Produto>> ListarAsync(CancellationToken ct = default)
     {
-        return await _repo.GetAllAsync();
+        return await _repo.GetAllAsync(ct);
     }
 
     public async Task<Produto?> ObterAsync(int id, CancellationToken ct = default)
@@ -47,14 +49,14 @@ public class ProdutoService : IProdutoService
             throw new ArgumentException("O preço do produto deve ser maior que zero.", nameof(preco));
         }
         
-        if (produto.Estoque <= 0)
+        if (produto.Estoque < 0)
         {
             throw new ArgumentException("O estoque do produto deve ser maior que zero.", nameof(estoque));
         }
         
         // Persistez via repository
         await _repo.AddAsync(produto, ct);
-        await _repo.SaveChangesAsync();
+        await _repo.SaveChangesAsync(ct);
         
         return produto;
     }
@@ -71,7 +73,7 @@ public class ProdutoService : IProdutoService
         }
 
         await _repo.RemoveAsync(produto, ct);
-        await _repo.SaveChangesAsync();
+        await _repo.SaveChangesAsync(ct);
 
         return true;
     }
