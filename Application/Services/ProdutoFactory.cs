@@ -8,7 +8,27 @@ public static class ProdutoFactory
 {
     public static Produto Criar(string nome, string descricao, decimal preco, int estoque)
     {
-        // TODO: Implementar regras e retornar instância pronta.
-        throw new NotImplementedException();
+          if (string.IsNullOrWhiteSpace(nome))
+        {
+            throw new ArgumentException("O nome é inválido...", nameof(nome));
+        }
+        
+        if (preco <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(preco), "O preço tem que ser maior que 0.");
+        }
+
+        if (estoque < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(estoque), "O estoque tem que ser postivo");
+        }
+
+        Console.WriteLine("Produto validado com sucesso! Criando...");
+        Produto produtoValido = new Produto();
+        produtoValido.Nome = nome;
+        produtoValido.Preco = preco;
+        produtoValido.Estoque = estoque;
+        produtoValido.DataCriacao = DateTime.Now;
+        return produtoValido;
     }
 }
