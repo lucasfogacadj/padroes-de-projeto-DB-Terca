@@ -23,3 +23,4 @@ public class Produto
     public DateTime DataCriacao { get; set; } = DateTime.Now;
 
 }
+
