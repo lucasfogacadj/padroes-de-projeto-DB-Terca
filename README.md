@@ -19,16 +19,53 @@ Este repositório está preparado para o trabalho em grupo. A base é uma API mi
 
 (Se não houver grupo para Validation ainda, ficará como extra.)
 
+## Status dos Grupos
+| Grupo | Status | Branch | Observações |
+|-------|--------|--------|-------------|
+| 1 - Repository | ⏳ Pendente | - | Aguardando implementação |
+| 2 - Service | ✅ Concluído | `feature/service` | Implementado com validações |
+| 3 - DTO + Mapping | ⏳ Pendente | - | Aguardando implementação |
+| 4 - Validation | ⏳ Pendente | - | Aguardando implementação |
+| 5 - Factory | ⏳ Pendente | - | Aguardando implementação |
+
+## Implementação do Service Pattern (Grupo 2)
+
+### ✅ O que foi implementado
+- **ProdutoService**: Classe que centraliza regras de negócio
+- **Métodos implementados**:
+  - `ListarAsync()` - Lista todos os produtos
+  - `ObterAsync(int id)` - Busca produto por ID com validação
+  - `CriarAsync(...)` - Cria produto com validações de negócio
+  - `RemoverAsync(int id)` - Remove produto com validação de existência
+
+### 🎯 Decisões técnicas tomadas
+
+#### **Estratégia de Tratamento de Erros**
+- **ArgumentException** para parâmetros inválidos (ID ≤ 0, preço ≤ 0, estoque < 0)
+- **Return false** para operações que podem falhar (produto não encontrado)
+- **Justificativa**: Permite tratamento flexível pelo chamador sem forçar try/catch
+
+#### **Validações de Negócio Implementadas**
+- ✅ Nome não pode ser nulo ou vazio
+- ✅ Preço deve ser maior que zero
+- ✅ Estoque não pode ser negativo
+- ✅ ID deve ser maior que zero para operações de busca/remoção
+
+#### **Integração com Outros Grupos**
+- ✅ Usa `IProdutoRepository` (aguardando implementação do grupo Repository)
+- ✅ Usa `ProdutoFactory.Criar()` (aguardando implementação do grupo Factory)
+- ✅ Retorna entidade `Produto` (compatível com grupo DTO/Mapping)
+
 ## Ordem Sugerida de Integração
 1. Repository
-2. Service
+2. Service ✅
 3. Factory + DTO/Mapping (podem andar em paralelo se coordenados)
 4. Validation (após DTO pronto)
 
 ## Branch Naming
 `feature/<nome-padrao>` – exemplos:
 - `feature/repository`
-- `feature/service`
+- `feature/service` ✅
 - `feature/dto-mapping`
 - `feature/factory`
 - `feature/validation`
