@@ -56,21 +56,6 @@ Este repositório está preparado para o trabalho em grupo. A base é uma API mi
 - ✅ Usa `ProdutoFactory.Criar()` (aguardando implementação do grupo Factory)
 - ✅ Retorna entidade `Produto` (compatível com grupo DTO/Mapping)
 
-### 🤔 Quando NÃO usar Service Pattern
-- ❌ **Projetos muito simples**: Se não há regras de negócio complexas, pode ser overkill
-- ❌ **APIs puramente CRUD**: Se só faz persistência sem lógica, repository + controller é suficiente
-- ❌ **Microserviços muito pequenos**: Pode adicionar complexidade desnecessária
-
-### 📊 Trade-offs do Service Pattern
-- ✅ **Prós**: Código organizado, testável, reutilizável, centraliza regras
-- ❌ **Contras**: Adiciona uma camada extra (pode ser overkill para APIs simples)
-
-### 🔄 Próximos passos
-1. Integrar com `ProdutoRepository` quando implementado
-2. Integrar com `ProdutoFactory` quando implementado
-3. Coordenar com grupo DTO para retornar DTOs ao invés de entidades
-4. Adicionar testes unitários com mocks
-
 ## Ordem Sugerida de Integração
 1. Repository
 2. Service ✅
@@ -86,11 +71,11 @@ Este repositório está preparado para o trabalho em grupo. A base é uma API mi
 - `feature/validation`
 
 ## Checklist de PR
-- [x] Branch criada corretamente
-- [x] Escopo único (apenas o padrão do grupo)
-- [x] README da pasta atualizado/expandido
-- [x] Código compila (`dotnet build`)
-- [x] Explicação: Quando NÃO usar este padrão
+- [ ] Branch criada corretamente
+- [ ] Escopo único (apenas o padrão do grupo)
+- [ ] README da pasta atualizado/expandido
+- [ ] Código compila (`dotnet build`)
+- [ ] Explicação: Quando NÃO usar este padrão
 - [ ] (Opcional) Teste simples
 - [ ] Endpoints ainda funcionam (quando integrados)
 
@@ -116,7 +101,7 @@ Este repositório está preparado para o trabalho em grupo. A base é uma API mi
 **Onde ficam validações?** Invariantes críticas podem estar na Factory; validações de entrada no Validator.
 
 
-Boa implementação! Lembrem-se de justificar escolhas, não só "fazer".
+Boa implementação! Lembrem-se de justificar escolhas, não só “fazer”.
 
 ---
 ### Documentação da Estrutura do Projeto
