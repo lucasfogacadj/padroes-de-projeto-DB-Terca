@@ -15,33 +15,41 @@ public class ProdutoRepository : IProdutoRepository
         _context = context;
     }
 
-    public Task<IEnumerable<Produto>> GetAllAsync(CancellationToken ct = default)
+    public async Task<IEnumerable<Produto>> GetAllAsync(CancellationToken ct = default)
     {
         // TODO: retornar lista com AsNoTracking.
-        throw new NotImplementedException();
+        
+        return await _context.Produtos.AsNoTracking().ToListAsync(ct);
+            
+
     }
 
-    public Task<Produto?> GetByIdAsync(int id, CancellationToken ct = default)
+    public async Task<Produto?> GetByIdAsync(int id, CancellationToken ct = default)
     {
         // TODO: usar FindAsync.
-        throw new NotImplementedException();
+    
+        return await _context.Produtos.FindAsync(new object[] { id }, ct);
     }
 
-    public Task AddAsync(Produto produto, CancellationToken ct = default)
+    public async Task AddAsync(Produto produto, CancellationToken ct = default)
     {
         // TODO: AddAsync(produto, ct)
-        throw new NotImplementedException();
+        
+        await _context.Produtos.AddAsync(produto, ct);
     }
 
     public Task RemoveAsync(Produto produto, CancellationToken ct = default)
     {
         // TODO: _context.Remove(produto)
-        throw new NotImplementedException();
+        
+        _context.Produtos.Remove(produto);
+        return Task.CompletedTask;
     }
 
-    public Task SaveChangesAsync(CancellationToken ct = default)
+    public async Task SaveChangesAsync(CancellationToken ct = default)
     {
         // TODO: _context.SaveChangesAsync(ct)
-        throw new NotImplementedException();
+    
+        await _context.SaveChangesAsync(ct);
     }
 }
