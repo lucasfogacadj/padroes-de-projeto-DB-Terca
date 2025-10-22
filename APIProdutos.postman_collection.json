@@ -1,0 +1,324 @@
+{
+	"info": {
+		"_postman_id": "a1b2c3d4-e5f6-7890-a1b2-c3d4e5f67890",
+		"name": "API Produtos - Padrões de Projeto",
+		"description": "Collection completa para testar a API de Produtos com Repository, Service, Factory e DTO patterns implementados.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Produtos",
+			"item": [
+				{
+					"name": "Listar Todos os Produtos",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/produtos",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"produtos"
+							]
+						},
+						"description": "Lista todos os produtos cadastrados no sistema.\n\n**Pattern**: Repository + Service + DTO Mapping"
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar Produto por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/produtos/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"produtos",
+								"1"
+							]
+						},
+						"description": "Busca um produto específico pelo ID.\n\n**Validações**:\n- ID deve ser maior que zero\n- Retorna 404 se não encontrado\n\n**Pattern**: Service Layer com validações"
+					},
+					"response": []
+				},
+				{
+					"name": "Criar Produto - Válido",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201 Created\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Response has ID\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.id).to.be.a('number');",
+									"    pm.environment.set(\"produto_id\", jsonData.id);",
+									"});",
+									"",
+									"pm.test(\"Response has DataCriacao\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.dataCriacao).to.exist;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Notebook Dell Inspiron 15\",\n  \"descricao\": \"Notebook com processador Intel Core i7, 16GB RAM, SSD 512GB\",\n  \"preco\": 3499.99,\n  \"estoque\": 25\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/produtos",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"produtos"
+							]
+						},
+						"description": "Cria um novo produto com dados válidos.\n\n**Validações (Factory Pattern)**:\n- Nome não vazio (máx 100 caracteres)\n- Descrição não vazia (máx 500 caracteres)\n- Preço > 0\n- Estoque >= 0\n\n**Pattern**: Factory + Service + Repository"
+					},
+					"response": []
+				},
+				{
+					"name": "Criar Produto - Nome Vazio (Erro)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"\",\n  \"descricao\": \"Produto sem nome para testar validação\",\n  \"preco\": 100.00,\n  \"estoque\": 10\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/produtos",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"produtos"
+							]
+						},
+						"description": "Testa validação de nome vazio.\n\n**Resultado esperado**: 400 Bad Request com mensagem de erro"
+					},
+					"response": []
+				},
+				{
+					"name": "Criar Produto - Preço Inválido (Erro)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Produto com Preço Negativo\",\n  \"descricao\": \"Teste de validação de preço\",\n  \"preco\": -50.00,\n  \"estoque\": 10\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/produtos",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"produtos"
+							]
+						},
+						"description": "Testa validação de preço <= 0.\n\n**Resultado esperado**: 400 Bad Request\n\n**Pattern**: Factory valida invariantes"
+					},
+					"response": []
+				},
+				{
+					"name": "Criar Produto - Estoque Negativo (Erro)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Produto com Estoque Negativo\",\n  \"descricao\": \"Teste de validação de estoque\",\n  \"preco\": 99.90,\n  \"estoque\": -5\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/produtos",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"produtos"
+							]
+						},
+						"description": "Testa validação de estoque negativo.\n\n**Resultado esperado**: 400 Bad Request"
+					},
+					"response": []
+				},
+				{
+					"name": "Criar Múltiplos Produtos",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Mouse Gamer RGB\",\n  \"descricao\": \"Mouse óptico com iluminação RGB, 7 botões programáveis, DPI ajustável até 16000\",\n  \"preco\": 149.90,\n  \"estoque\": 50\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/produtos",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"produtos"
+							]
+						},
+						"description": "Use este request múltiplas vezes alterando os dados para popular o banco.\n\n**Exemplos de produtos**:\n- Teclado Mecânico\n- Monitor 27 polegadas\n- Webcam HD\n- Headset Gamer"
+					},
+					"response": []
+				},
+				{
+					"name": "Remover Produto",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/produtos/{{produto_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"produtos",
+								"{{produto_id}}"
+							]
+						},
+						"description": "Remove um produto existente.\n\n**Resultado esperado**:\n- 204 No Content se removido com sucesso\n- 404 Not Found se produto não existir\n- 400 Bad Request se ID inválido\n\n**Pattern**: Service Layer coordena Repository"
+					},
+					"response": []
+				},
+				{
+					"name": "Remover Produto Inexistente (404)",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/produtos/9999",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"produtos",
+								"9999"
+							]
+						},
+						"description": "Testa remoção de produto que não existe.\n\n**Resultado esperado**: 404 Not Found"
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar Produto com ID Inválido (400)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/produtos/0",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"produtos",
+								"0"
+							]
+						},
+						"description": "Testa validação de ID <= 0.\n\n**Resultado esperado**: 400 Bad Request\n\n**Pattern**: Service valida precondições"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints CRUD completos para gerenciamento de produtos.\n\n**Padrões Implementados**:\n- Repository Pattern\n- Service Pattern\n- Factory Pattern\n- DTO Pattern"
+		},
+		{
+			"name": "Health Check",
+			"item": [
+				{
+					"name": "Verificar API Online",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								""
+							]
+						},
+						"description": "Verifica se a API está respondendo."
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:5000",
+			"type": "string"
+		},
+		{
+			"key": "produto_id",
+			"value": "1",
+			"type": "string"
+		}
+	]
+}
