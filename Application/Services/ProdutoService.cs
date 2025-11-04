@@ -2,6 +2,7 @@ using Application.Interfaces;
 using Domain.Entities;
 using Application.Services;
 using Application.DTOs;
+using Application.Exceptions;
 
 namespace Application.Services;
 
@@ -27,13 +28,13 @@ public class ProdutoService : IProdutoService
     {
         if (id <= 0)
         {
-            throw new ArgumentException("O Id do produto deve ser maior que zero.", nameof(id));
+            throw new ValidationException("id", "O Id do produto deve ser maior que zero.");
         }
 
         var produto = await _repo.GetByIdAsync(id, ct);
         if(produto == null)
         {
-            throw new ArgumentException("Ppoduto não encontrado");
+            throw new NotFoundException("Produto", id);
         }
         var produtoDTO = MappingExtensions.ToReadDto(produto);
         return produtoDTO;
@@ -46,25 +47,119 @@ public class ProdutoService : IProdutoService
         
         var produto = ProdutoFactory.Criar(nome, descricao, preco, estoque);
         
-        if (string.IsNullOrEmpty(produto.Nome))
+        if (string.IsNullOrWhiteSpace(produto.Nome))
         {
-            throw new ArgumentException("O nome do produto não pode ser nulo ou vazio. ", nameof(nome));
+            throw new ValidationException("nome", "O nome do produto não pode ser nulo ou vazio.");
         }
         
-        if (produto.Preco < 0)
+        if (produto.Preco <= 0)
         {
-            throw new ArgumentException("O preço do produto deve ser maior que zero.", nameof(preco));
+            throw new ValidationException("preco", "O preço do produto deve ser maior que zero.");
         }
         
         if (produto.Estoque < 0)
         {
-            throw new ArgumentException("O estoque do produto deve ser maior que zero.", nameof(estoque));
+            throw new ValidationException("estoque", "O estoque do produto não pode ser negativo.");
         }
         
         // Persistez via repository
         await _repo.AddAsync(produto, ct);
         await _repo.SaveChangesAsync(ct);
         
+        return produto;
+    }
+
+    public async Task<Produto> AtualizarAsync(int id, ProdutoUpdateDto dto, CancellationToken ct = default)
+    {
+        // PUT - Substituição total do recurso
+        // Todos os campos devem ser fornecidos
+        
+        // 1. Buscar produto existente
+        var produto = await _repo.GetByIdAsync(id, ct);
+        if (produto == null)
+        {
+            throw new NotFoundException("Produto", id);
+        }
+
+        // 2. Validar dados (já validados pelos DataAnnotations, mas reforçar regras de negócio)
+        if (string.IsNullOrWhiteSpace(dto.Nome))
+        {
+            throw new ValidationException("nome", "O nome do produto é obrigatório.");
+        }
+
+        if (dto.Preco <= 0)
+        {
+            throw new ValidationException("preco", "O preço deve ser maior que zero.");
+        }
+
+        if (dto.Estoque < 0)
+        {
+            throw new ValidationException("estoque", "O estoque não pode ser negativo.");
+        }
+
+        // 3. Substituir TODOS os campos (exceto ID e DataCriacao que são imutáveis)
+        produto.Nome = dto.Nome.Trim();
+        produto.Descricao = dto.Descricao.Trim();
+        produto.Preco = dto.Preco;
+        produto.Estoque = dto.Estoque;
+        // DataCriacao permanece inalterada
+
+        // 4. Persistir
+        await _repo.UpdateAsync(produto, ct);
+        await _repo.SaveChangesAsync(ct);
+
+        return produto;
+    }
+
+    public async Task<Produto> AtualizarParcialAsync(int id, ProdutoPatchDto dto, CancellationToken ct = default)
+    {
+        // PATCH - Atualização parcial do recurso
+        // Apenas campos fornecidos (não-null) serão atualizados
+        
+        // 1. Buscar produto existente
+        var produto = await _repo.GetByIdAsync(id, ct);
+        if (produto == null)
+        {
+            throw new NotFoundException("Produto", id);
+        }
+
+        // 2. Atualizar APENAS campos fornecidos
+        if (dto.Nome != null)
+        {
+            if (string.IsNullOrWhiteSpace(dto.Nome))
+            {
+                throw new ValidationException("nome", "O nome não pode ser vazio.");
+            }
+            produto.Nome = dto.Nome.Trim();
+        }
+
+        if (dto.Descricao != null)
+        {
+            produto.Descricao = dto.Descricao.Trim();
+        }
+
+        if (dto.Preco.HasValue)
+        {
+            if (dto.Preco.Value <= 0)
+            {
+                throw new ValidationException("preco", "O preço deve ser maior que zero.");
+            }
+            produto.Preco = dto.Preco.Value;
+        }
+
+        if (dto.Estoque.HasValue)
+        {
+            if (dto.Estoque.Value < 0)
+            {
+                throw new ValidationException("estoque", "O estoque não pode ser negativo.");
+            }
+            produto.Estoque = dto.Estoque.Value;
+        }
+
+        // 3. Persistir
+        await _repo.UpdateAsync(produto, ct);
+        await _repo.SaveChangesAsync(ct);
+
         return produto;
     }
 

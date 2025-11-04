@@ -38,6 +38,13 @@ public class ProdutoRepository : IProdutoRepository
         await _context.Produtos.AddAsync(produto, ct);
     }
 
+    public Task UpdateAsync(Produto produto, CancellationToken ct = default)
+    {
+        // Marca a entidade como modificada no EF Core
+        _context.Produtos.Update(produto);
+        return Task.CompletedTask;
+    }
+
     public Task RemoveAsync(Produto produto, CancellationToken ct = default)
     {
         // TODO: _context.Remove(produto)

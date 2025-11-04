@@ -1,0 +1,341 @@
+# ===============================================
+# TESTES - API de Produtos
+# PUT vs PATCH & Exception Handling
+# ===============================================
+
+@baseUrl = https://localhost:5001
+@produtoId = 1
+
+# ===============================================
+# PARTE 1: OPERAÇÕES BÁSICAS (GET/POST)
+# ===============================================
+
+### 1. Listar todos os produtos
+GET {{baseUrl}}/produtos
+Content-Type: application/json
+
+### 2. Obter produto específico (SUCESSO)
+GET {{baseUrl}}/produtos/{{produtoId}}
+Content-Type: application/json
+
+### 3. Criar novo produto
+POST {{baseUrl}}/produtos
+Content-Type: application/json
+
+{
+  "nome": "Notebook Dell Inspiron",
+  "descricao": "Intel i5, 8GB RAM, SSD 256GB",
+  "preco": 3500.00,
+  "estoque": 10
+}
+
+# ===============================================
+# PARTE 2: PUT - ATUALIZAÇÃO COMPLETA
+# ===============================================
+
+### 4. PUT - Atualização completa (SUCESSO)
+# TODOS os campos são obrigatórios
+PUT {{baseUrl}}/produtos/1
+Content-Type: application/json
+
+{
+  "nome": "Notebook Dell XPS 15",
+  "descricao": "Intel i7 11ª geração, 16GB RAM, SSD 512GB, Tela 4K",
+  "preco": 5500.00,
+  "estoque": 8
+}
+
+### 5. PUT - Erro 400 (campo obrigatório ausente)
+# ❌ Deve falhar: falta descrição e estoque
+PUT {{baseUrl}}/produtos/1
+Content-Type: application/json
+
+{
+  "nome": "Notebook Dell XPS 15",
+  "preco": 5500.00
+}
+
+### 6. PUT - Erro 400 (preço inválido)
+# ❌ Deve falhar: preço negativo
+PUT {{baseUrl}}/produtos/1
+Content-Type: application/json
+
+{
+  "nome": "Notebook Dell",
+  "descricao": "Descrição teste",
+  "preco": -100.00,
+  "estoque": 5
+}
+
+### 7. PUT - Erro 404 (produto não existe)
+PUT {{baseUrl}}/produtos/999
+Content-Type: application/json
+
+{
+  "nome": "Produto Inexistente",
+  "descricao": "Teste",
+  "preco": 100.00,
+  "estoque": 5
+}
+
+# ===============================================
+# PARTE 3: PATCH - ATUALIZAÇÃO PARCIAL
+# ===============================================
+
+### 8. PATCH - Atualizar apenas o preço (SUCESSO)
+PATCH {{baseUrl}}/produtos/1
+Content-Type: application/json
+
+{
+  "preco": 5200.00
+}
+
+### 9. PATCH - Atualizar nome e descrição (SUCESSO)
+PATCH {{baseUrl}}/produtos/1
+Content-Type: application/json
+
+{
+  "nome": "Notebook Dell XPS 15 (Promoção)",
+  "descricao": "Intel i7 11ª geração, 16GB RAM, SSD 512GB - COM DESCONTO!"
+}
+
+### 10. PATCH - Atualizar apenas estoque (SUCESSO)
+PATCH {{baseUrl}}/produtos/1
+Content-Type: application/json
+
+{
+  "estoque": 15
+}
+
+### 11. PATCH - Atualizar múltiplos campos (SUCESSO)
+PATCH {{baseUrl}}/produtos/1
+Content-Type: application/json
+
+{
+  "preco": 4999.99,
+  "estoque": 20,
+  "descricao": "BLACK FRIDAY - Preço especial!"
+}
+
+### 12. PATCH - Erro 400 (preço inválido)
+# ❌ Deve falhar: preço zero
+PATCH {{baseUrl}}/produtos/1
+Content-Type: application/json
+
+{
+  "preco": 0
+}
+
+### 13. PATCH - Erro 400 (nome vazio)
+# ❌ Deve falhar: nome não pode ser vazio
+PATCH {{baseUrl}}/produtos/1
+Content-Type: application/json
+
+{
+  "nome": ""
+}
+
+### 14. PATCH - Erro 404 (produto não existe)
+PATCH {{baseUrl}}/produtos/999
+Content-Type: application/json
+
+{
+  "preco": 100.00
+}
+
+# ===============================================
+# PARTE 4: TESTES DE EXCEPTION HANDLING
+# ===============================================
+
+### 15. GET - Erro 404 (produto não encontrado)
+GET {{baseUrl}}/produtos/999
+Content-Type: application/json
+
+### 16. GET - Erro 400 (ID inválido)
+GET {{baseUrl}}/produtos/0
+Content-Type: application/json
+
+### 17. POST - Erro 400 (validação falhou - nome vazio)
+POST {{baseUrl}}/produtos
+Content-Type: application/json
+
+{
+  "nome": "",
+  "descricao": "Teste",
+  "preco": 100.00,
+  "estoque": 5
+}
+
+### 18. POST - Erro 400 (validação falhou - preço negativo)
+POST {{baseUrl}}/produtos
+Content-Type: application/json
+
+{
+  "nome": "Produto Teste",
+  "descricao": "Teste",
+  "preco": -50.00,
+  "estoque": 5
+}
+
+### 19. POST - Erro 400 (validação falhou - estoque negativo)
+POST {{baseUrl}}/produtos
+Content-Type: application/json
+
+{
+  "nome": "Produto Teste",
+  "descricao": "Teste",
+  "preco": 100.00,
+  "estoque": -5
+}
+
+### 20. POST - Erro 400 (múltiplos erros de validação)
+POST {{baseUrl}}/produtos
+Content-Type: application/json
+
+{
+  "nome": "",
+  "descricao": "",
+  "preco": -100.00,
+  "estoque": -10
+}
+
+# ===============================================
+# PARTE 5: CENÁRIOS DE COMPARAÇÃO PUT vs PATCH
+# ===============================================
+
+### 21. Criar produto para testes de comparação
+POST {{baseUrl}}/produtos
+Content-Type: application/json
+
+{
+  "nome": "Mouse Logitech",
+  "descricao": "Mouse sem fio, ergonômico",
+  "preco": 150.00,
+  "estoque": 50
+}
+
+### 22. Ver produto criado (pegar o ID)
+GET {{baseUrl}}/produtos
+
+### 23. PATCH - Atualizar só o preço (outros campos mantidos)
+# ✅ Nome, descrição e estoque permanecem iguais
+PATCH {{baseUrl}}/produtos/2
+Content-Type: application/json
+
+{
+  "preco": 130.00
+}
+
+### 24. Ver produto após PATCH
+GET {{baseUrl}}/produtos/2
+
+### 25. PUT - Tentar atualizar só o preço (vai dar erro ou resetar campos)
+# ❌ Se não enviar todos campos, dá erro de validação
+PUT {{baseUrl}}/produtos/2
+Content-Type: application/json
+
+{
+  "preco": 120.00
+}
+
+### 26. PUT - Correto (com todos os campos)
+# ✅ Precisa enviar TUDO
+PUT {{baseUrl}}/produtos/2
+Content-Type: application/json
+
+{
+  "nome": "Mouse Logitech MX Master",
+  "descricao": "Mouse sem fio, ergonômico, 7 botões programáveis",
+  "preco": 180.00,
+  "estoque": 30
+}
+
+### 27. Ver produto após PUT
+GET {{baseUrl}}/produtos/2
+
+# ===============================================
+# PARTE 6: TESTES DE IDEMPOTÊNCIA
+# ===============================================
+
+### 28. PUT - Executar 3 vezes seguidas (deve dar mesmo resultado)
+PUT {{baseUrl}}/produtos/1
+Content-Type: application/json
+
+{
+  "nome": "Notebook Dell XPS 15 - Idempotência Test",
+  "descricao": "Teste de idempotência",
+  "preco": 5000.00,
+  "estoque": 10
+}
+
+### 29. Ver produto (deve estar igual após múltiplas execuções do PUT acima)
+GET {{baseUrl}}/produtos/1
+
+### 30. PATCH - Executar 3 vezes seguidas (deve dar mesmo resultado)
+PATCH {{baseUrl}}/produtos/1
+Content-Type: application/json
+
+{
+  "preco": 4800.00
+}
+
+### 31. Ver produto (deve estar igual após múltiplas execuções do PATCH acima)
+GET {{baseUrl}}/produtos/1
+
+# ===============================================
+# PARTE 7: EDGE CASES
+# ===============================================
+
+### 32. PATCH - Enviar objeto vazio (não deve alterar nada)
+PATCH {{baseUrl}}/produtos/1
+Content-Type: application/json
+
+{
+}
+
+### 33. PUT - Valores no limite
+PUT {{baseUrl}}/produtos/1
+Content-Type: application/json
+
+{
+  "nome": "A",
+  "descricao": "Descrição mínima",
+  "preco": 0.01,
+  "estoque": 0
+}
+
+### 34. PATCH - Nome com espaços (deve fazer trim)
+PATCH {{baseUrl}}/produtos/1
+Content-Type: application/json
+
+{
+  "nome": "  Produto com Espaços  "
+}
+
+### 35. Ver resultado do trim
+GET {{baseUrl}}/produtos/1
+
+# ===============================================
+# PARTE 8: DELETE (para completude)
+# ===============================================
+
+### 36. Criar produto para deletar
+POST {{baseUrl}}/produtos
+Content-Type: application/json
+
+{
+  "nome": "Produto Temporário",
+  "descricao": "Será deletado",
+  "preco": 99.99,
+  "estoque": 1
+}
+
+### 37. Deletar produto
+DELETE {{baseUrl}}/produtos/3
+
+### 38. Tentar obter produto deletado (deve retornar 404)
+GET {{baseUrl}}/produtos/3
+
+# ===============================================
+# FIM DOS TESTES
+# ===============================================
