@@ -206,6 +206,352 @@
 					"response": []
 				},
 				{
+					"name": "Atualizar Produto Completo (PUT) - Válido",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Todos os campos foram atualizados\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.nome).to.eql(\"Notebook Dell XPS 15\");",
+									"    pm.expect(jsonData.preco).to.eql(5500.00);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Notebook Dell XPS 15\",\n  \"descricao\": \"Intel i7 11ª geração, 16GB RAM, SSD 512GB, Tela 4K\",\n  \"preco\": 5500.00,\n  \"estoque\": 8\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/produtos/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"produtos",
+								"1"
+							]
+						},
+						"description": "Atualiza COMPLETAMENTE um produto existente (PUT).\n\n**Características do PUT**:\n- Substitui TODOS os campos do recurso\n- TODOS os campos são obrigatórios\n- Se omitir campo → Erro 400 Bad Request\n- Idempotente (executar N vezes = mesmo resultado)\n\n**Validações**:\n- Nome obrigatório (3-100 caracteres)\n- Descrição obrigatória (máx 500 caracteres)\n- Preço > 0\n- Estoque >= 0\n\n**Resultado esperado**: 200 OK com produto atualizado"
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Produto Completo (PUT) - Campos Faltando (Erro)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Notebook Dell XPS 15\",\n  \"preco\": 5500.00\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/produtos/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"produtos",
+								"1"
+							]
+						},
+						"description": "Testa PUT sem todos os campos obrigatórios.\n\n**Resultado esperado**: 400 Bad Request\n\n**Mensagem**: Campos obrigatórios ausentes (descricao, estoque)\n\n**Aprendizado**: PUT exige TODOS os campos!"
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Produto Completo (PUT) - Preço Inválido (Erro)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Notebook Dell\",\n  \"descricao\": \"Teste de validação\",\n  \"preco\": -100.00,\n  \"estoque\": 5\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/produtos/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"produtos",
+								"1"
+							]
+						},
+						"description": "Testa PUT com preço negativo.\n\n**Resultado esperado**: 400 Bad Request\n\n**Validação**: O preço deve ser maior que zero."
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Produto Completo (PUT) - Produto Inexistente (404)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Produto Inexistente\",\n  \"descricao\": \"Teste de produto não encontrado\",\n  \"preco\": 100.00,\n  \"estoque\": 5\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/produtos/9999",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"produtos",
+								"9999"
+							]
+						},
+						"description": "Testa PUT em produto que não existe.\n\n**Resultado esperado**: 404 Not Found\n\n**Problem Details**: Recurso não encontrado"
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Produto Parcial (PATCH) - Apenas Preço",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Apenas preço foi alterado\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.preco).to.eql(5200.00);",
+									"    // Outros campos devem permanecer inalterados",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"preco\": 5200.00\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/produtos/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"produtos",
+								"1"
+							]
+						},
+						"description": "Atualiza PARCIALMENTE um produto (PATCH) - apenas o preço.\n\n**Características do PATCH**:\n- Atualiza APENAS campos enviados\n- Todos campos são opcionais (nullable)\n- Campos não enviados permanecem inalterados\n- Idempotente (valores absolutos)\n- Economia de banda\n\n**Resultado esperado**: 200 OK\n- Preço atualizado\n- Nome, descrição, estoque INALTERADOS"
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Produto Parcial (PATCH) - Nome e Descrição",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Notebook Dell XPS 15 (Promoção)\",\n  \"descricao\": \"Intel i7 11ª geração, 16GB RAM, SSD 512GB - COM DESCONTO!\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/produtos/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"produtos",
+								"1"
+							]
+						},
+						"description": "Atualiza parcialmente - apenas nome e descrição.\n\n**Resultado esperado**: 200 OK\n- Nome e descrição atualizados\n- Preço e estoque INALTERADOS"
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Produto Parcial (PATCH) - Múltiplos Campos",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"preco\": 4999.99,\n  \"estoque\": 20,\n  \"descricao\": \"BLACK FRIDAY - Preço especial!\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/produtos/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"produtos",
+								"1"
+							]
+						},
+						"description": "Atualiza múltiplos campos com PATCH.\n\n**Campos atualizados**: preço, estoque, descrição\n**Campos mantidos**: nome\n\n**Resultado esperado**: 200 OK"
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Produto Parcial (PATCH) - Preço Inválido (Erro)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"preco\": 0\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/produtos/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"produtos",
+								"1"
+							]
+						},
+						"description": "Testa PATCH com preço inválido (zero).\n\n**Resultado esperado**: 400 Bad Request\n\n**Validação**: O preço deve ser maior que zero."
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Produto Parcial (PATCH) - Nome Vazio (Erro)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/produtos/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"produtos",
+								"1"
+							]
+						},
+						"description": "Testa PATCH com nome vazio.\n\n**Resultado esperado**: 400 Bad Request\n\n**Validação**: O nome não pode ser vazio."
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Produto Parcial (PATCH) - Produto Inexistente (404)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"preco\": 100.00\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/produtos/9999",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"produtos",
+								"9999"
+							]
+						},
+						"description": "Testa PATCH em produto inexistente.\n\n**Resultado esperado**: 404 Not Found\n\n**Problem Details**: Produto com ID '9999' não foi encontrado."
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Produto Parcial (PATCH) - Objeto Vazio",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/produtos/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"produtos",
+								"1"
+							]
+						},
+						"description": "Testa PATCH com objeto vazio.\n\n**Resultado esperado**: 200 OK (nenhum campo alterado)\n\n**Comportamento**: Produto permanece inalterado"
+					},
+					"response": []
+				},
+				{
 					"name": "Remover Produto",
 					"request": {
 						"method": "DELETE",
@@ -263,7 +609,7 @@
 					"response": []
 				}
 			],
-			"description": "Endpoints CRUD completos para gerenciamento de produtos.\n\n**Padrões Implementados**:\n- Repository Pattern\n- Service Pattern\n- Factory Pattern\n- DTO Pattern"
+			"description": "Endpoints CRUD completos para gerenciamento de produtos.\n\n**Padrões Implementados**:\n- Repository Pattern\n- Service Pattern\n- Factory Pattern\n- DTO Pattern\n- Exception Handling (Middleware)\n\n**Operações Disponíveis**:\n- GET /produtos - Listar todos\n- GET /produtos/{id} - Buscar por ID\n- POST /produtos - Criar novo\n- PUT /produtos/{id} - Atualizar completo (todos campos)\n- PATCH /produtos/{id} - Atualizar parcial (campos opcionais)\n- DELETE /produtos/{id} - Remover\n\n**PUT vs PATCH**:\n- PUT = Substituição total (todos campos obrigatórios)\n- PATCH = Atualização parcial (só envia o que muda)"
 		},
 		{
 			"name": "Health Check",

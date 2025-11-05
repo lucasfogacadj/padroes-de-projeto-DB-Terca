@@ -11,4 +11,6 @@ public interface IProdutoRepository
     Task AddAsync(Produto produto, CancellationToken ct = default);
     Task RemoveAsync(Produto produto, CancellationToken ct = default);
     Task SaveChangesAsync(CancellationToken ct = default);
+
+    Task UpdateAsync(Produto produto, CancellationToken ct = default); 
 }

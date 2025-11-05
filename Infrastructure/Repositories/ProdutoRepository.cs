@@ -49,7 +49,13 @@ public class ProdutoRepository : IProdutoRepository
     public async Task SaveChangesAsync(CancellationToken ct = default)
     {
         // TODO: _context.SaveChangesAsync(ct)
-    
+
         await _context.SaveChangesAsync(ct);
+    }
+
+    public  Task UpdateAsync(Produto produto, CancellationToken ct = default)
+    {
+        _context.Produtos.Update(produto);
+        return Task.CompletedTask;
     }
 }
