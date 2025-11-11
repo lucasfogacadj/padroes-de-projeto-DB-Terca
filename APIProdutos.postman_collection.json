@@ -2,7 +2,7 @@
 	"info": {
 		"_postman_id": "a1b2c3d4-e5f6-7890-a1b2-c3d4e5f67890",
 		"name": "API Produtos - Padrões de Projeto",
-		"description": "Collection completa para testar a API de Produtos com Repository, Service, Factory e DTO patterns implementados.",
+		"description": "Collection completa para testar a API de Produtos com Repository, Service, Factory, DTO e FluentValidation implementados.\n\n**Padrões Implementados**:\n- ✅ Repository Pattern\n- ✅ Service Pattern\n- ✅ Factory Pattern\n- ✅ DTO Pattern\n- ✅ FluentValidation\n\n**Última atualização**: 11/11/2025\n**Versão**: 2.0",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
@@ -99,6 +99,31 @@
 				},
 				{
 					"name": "Criar Produto - Nome Vazio (Erro)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400 Bad Request\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"Response is Problem Details format\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('errors');",
+									"    pm.expect(jsonData.errors).to.have.property('Nome');",
+									"});",
+									"",
+									"pm.test(\"Error message in Portuguese\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    var nomeErrors = jsonData.errors.Nome;",
+									"    pm.expect(nomeErrors[0]).to.include('obrigatório');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
@@ -120,12 +145,36 @@
 								"produtos"
 							]
 						},
-						"description": "Testa validação de nome vazio.\n\n**Resultado esperado**: 400 Bad Request com mensagem de erro"
+						"description": "Testa validação FluentValidation - nome vazio.\n\n**Validador**: ProdutoCreateDtoValidator\n\n**Regra violada**: Nome obrigatório\n\n**Resultado esperado**: \n- Status: 400 Bad Request\n- Problem Details (RFC 7807)\n- Mensagem: \"O nome do produto é obrigatório.\"\n\n**Pattern**: FluentValidation"
 					},
 					"response": []
 				},
 				{
 					"name": "Criar Produto - Preço Inválido (Erro)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400 Bad Request\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"Has validation error for Preco\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.errors).to.have.property('Preco');",
+									"});",
+									"",
+									"pm.test(\"Error message mentions 'maior que zero'\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    var precoErrors = jsonData.errors.Preco;",
+									"    pm.expect(precoErrors[0]).to.include('maior que zero');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
@@ -147,12 +196,36 @@
 								"produtos"
 							]
 						},
-						"description": "Testa validação de preço <= 0.\n\n**Resultado esperado**: 400 Bad Request\n\n**Pattern**: Factory valida invariantes"
+						"description": "Testa validação FluentValidation - preço negativo.\n\n**Validador**: ProdutoCreateDtoValidator\n\n**Regra violada**: Preço > 0\n\n**Resultado esperado**:\n- Status: 400 Bad Request\n- Mensagem: \"O preço deve ser maior que zero.\"\n\n**Pattern**: FluentValidation com GreaterThan(0)"
 					},
 					"response": []
 				},
 				{
 					"name": "Criar Produto - Estoque Negativo (Erro)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400 Bad Request\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"Has validation error for Estoque\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.errors).to.have.property('Estoque');",
+									"});",
+									"",
+									"pm.test(\"Error message mentions 'não pode ser negativo'\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    var estoqueErrors = jsonData.errors.Estoque;",
+									"    pm.expect(estoqueErrors[0]).to.include('não pode ser negativo');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
@@ -174,7 +247,264 @@
 								"produtos"
 							]
 						},
-						"description": "Testa validação de estoque negativo.\n\n**Resultado esperado**: 400 Bad Request"
+						"description": "Testa validação FluentValidation - estoque negativo.\n\n**Validador**: ProdutoCreateDtoValidator\n\n**Regra violada**: Estoque >= 0\n\n**Resultado esperado**:\n- Status: 400 Bad Request\n- Mensagem: \"O estoque não pode ser negativo.\"\n\n**Pattern**: FluentValidation com GreaterThanOrEqualTo(0)"
+					},
+					"response": []
+				},
+				{
+					"name": "Criar Produto - Nome Muito Longo (Erro)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400 Bad Request\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"Has validation error for Nome\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.errors).to.have.property('Nome');",
+									"});",
+									"",
+									"pm.test(\"Error message mentions character limit\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    var nomeErrors = jsonData.errors.Nome;",
+									"    pm.expect(nomeErrors[0]).to.include('200 caracteres');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Este é um nome extremamente longo para testar a validação de tamanho máximo do campo nome que não pode ultrapassar duzentos caracteres conforme especificado no validador e esta string tem muito mais que isso para garantir que a validação vai falhar corretamente\",\n  \"descricao\": \"Teste de validação de tamanho\",\n  \"preco\": 100.00,\n  \"estoque\": 10\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/produtos",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"produtos"
+							]
+						},
+						"description": "Testa validação FluentValidation - nome excede 200 caracteres.\n\n**Validador**: ProdutoCreateDtoValidator\n\n**Regra violada**: MaximumLength(200)\n\n**Resultado esperado**:\n- Status: 400 Bad Request\n- Mensagem: \"O nome do produto não pode ter mais de 200 caracteres.\"\n\n**Pattern**: FluentValidation com MaximumLength()"
+					},
+					"response": []
+				},
+				{
+					"name": "Criar Produto - Descrição Muito Longa (Erro)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400 Bad Request\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"Has validation error for Descricao\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.errors).to.have.property('Descricao');",
+									"});",
+									"",
+									"pm.test(\"Error message mentions 1000 characters limit\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    var descErrors = jsonData.errors.Descricao;",
+									"    pm.expect(descErrors[0]).to.include('1000 caracteres');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Produto com Descrição Longa\",\n  \"descricao\": \"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident.\",\n  \"preco\": 100.00,\n  \"estoque\": 10\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/produtos",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"produtos"
+							]
+						},
+						"description": "Testa validação FluentValidation - descrição excede 1000 caracteres.\n\n**Validador**: ProdutoCreateDtoValidator\n\n**Regra violada**: MaximumLength(1000)\n\n**Resultado esperado**:\n- Status: 400 Bad Request\n- Mensagem: \"A descrição não pode ter mais de 1000 caracteres.\"\n\n**Pattern**: FluentValidation com MaximumLength() condicional"
+					},
+					"response": []
+				},
+				{
+					"name": "Criar Produto - Nome Apenas Espaços (Erro)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400 Bad Request\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"Has validation error for Nome\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.errors).to.have.property('Nome');",
+									"});",
+									"",
+									"pm.test(\"Error message mentions whitespace\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    var nomeErrors = jsonData.errors.Nome;",
+									"    pm.expect(nomeErrors.some(e => e.includes('espaços') || e.includes('branco'))).to.be.true;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"     \",\n  \"descricao\": \"Teste de nome com apenas espaços\",\n  \"preco\": 100.00,\n  \"estoque\": 10\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/produtos",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"produtos"
+							]
+						},
+						"description": "Testa validação FluentValidation - nome com apenas espaços em branco.\n\n**Validador**: ProdutoCreateDtoValidator\n\n**Regra violada**: Must(nome => !string.IsNullOrWhiteSpace(nome))\n\n**Resultado esperado**:\n- Status: 400 Bad Request\n- Mensagem: \"O nome do produto não pode conter apenas espaços em branco.\"\n\n**Pattern**: FluentValidation com Must() custom"
+					},
+					"response": []
+				},
+				{
+					"name": "Criar Produto - Múltiplos Erros (Erro)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400 Bad Request\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"Has multiple validation errors\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    var errorCount = Object.keys(jsonData.errors).length;",
+									"    pm.expect(errorCount).to.be.at.least(3);",
+									"});",
+									"",
+									"pm.test(\"Has errors for Nome, Preco and Estoque\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.errors).to.have.property('Nome');",
+									"    pm.expect(jsonData.errors).to.have.property('Preco');",
+									"    pm.expect(jsonData.errors).to.have.property('Estoque');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"\",\n  \"descricao\": \"Teste de múltiplos erros simultâneos\",\n  \"preco\": -100.00,\n  \"estoque\": -50\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/produtos",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"produtos"
+							]
+						},
+						"description": "Testa validação FluentValidation - múltiplos campos inválidos simultaneamente.\n\n**Validador**: ProdutoCreateDtoValidator\n\n**Regras violadas**: \n- Nome vazio\n- Preço negativo\n- Estoque negativo\n\n**Resultado esperado**:\n- Status: 400 Bad Request\n- Problem Details com array de erros\n- Todas as validações executadas (não para no primeiro erro)\n\n**Aprendizado**: FluentValidation valida TODOS os campos antes de retornar"
+					},
+					"response": []
+				},
+				{
+					"name": "Criar Produto - Preço com Muitas Casas Decimais (Erro)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400 Bad Request\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"Has validation error for Preco\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.errors).to.have.property('Preco');",
+									"});",
+									"",
+									"pm.test(\"Error message mentions decimal places\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    var precoErrors = jsonData.errors.Preco;",
+									"    pm.expect(precoErrors[0]).to.include('casas decimais');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Produto Teste\",\n  \"descricao\": \"Teste de precisão decimal\",\n  \"preco\": 100.999,\n  \"estoque\": 10\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/produtos",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"produtos"
+							]
+						},
+						"description": "Testa validação FluentValidation - preço com mais de 2 casas decimais.\n\n**Validador**: ProdutoCreateDtoValidator\n\n**Regra violada**: PrecisionScale(10, 2)\n\n**Resultado esperado**:\n- Status: 400 Bad Request\n- Mensagem: \"O preço deve ter no máximo 2 casas decimais e 10 dígitos no total.\"\n\n**Pattern**: FluentValidation com PrecisionScale()"
 					},
 					"response": []
 				},
@@ -609,7 +939,570 @@
 					"response": []
 				}
 			],
-			"description": "Endpoints CRUD completos para gerenciamento de produtos.\n\n**Padrões Implementados**:\n- Repository Pattern\n- Service Pattern\n- Factory Pattern\n- DTO Pattern\n- Exception Handling (Middleware)\n\n**Operações Disponíveis**:\n- GET /produtos - Listar todos\n- GET /produtos/{id} - Buscar por ID\n- POST /produtos - Criar novo\n- PUT /produtos/{id} - Atualizar completo (todos campos)\n- PATCH /produtos/{id} - Atualizar parcial (campos opcionais)\n- DELETE /produtos/{id} - Remover\n\n**PUT vs PATCH**:\n- PUT = Substituição total (todos campos obrigatórios)\n- PATCH = Atualização parcial (só envia o que muda)"
+			"description": "Endpoints CRUD completos para gerenciamento de produtos.\n\n**Padrões Implementados**:\n- ✅ Repository Pattern - Abstração de persistência\n- ✅ Service Pattern - Lógica de negócio centralizada\n- ✅ Factory Pattern - Criação controlada de produtos\n- ✅ DTO Pattern - Contratos de API desacoplados\n- ✅ FluentValidation - Validação declarativa e reutilizável\n\n**Validações FluentValidation**:\n- Nome: obrigatório, máx 200 caracteres, não apenas espaços\n- Descrição: opcional, máx 1000 caracteres\n- Preço: obrigatório, > 0, máx 2 casas decimais\n- Estoque: obrigatório, >= 0\n\n**Operações Disponíveis**:\n- GET /produtos - Listar todos\n- GET /produtos/{id} - Buscar por ID\n- POST /produtos - Criar novo (com FluentValidation)\n- PUT /produtos/{id} - Atualizar completo (com FluentValidation)\n- PATCH /produtos/{id} - Atualizar parcial\n- DELETE /produtos/{id} - Remover\n\n**PUT vs PATCH**:\n- PUT = Substituição total (todos campos obrigatórios)\n- PATCH = Atualização parcial (só envia o que muda)\n\n**Respostas de Erro**:\n- Validação: 400 Bad Request + Problem Details (RFC 7807)\n- Não encontrado: 404 Not Found\n- Erro interno: 500 Internal Server Error"
+		},
+		{
+			"name": "FluentValidation - Testes",
+			"item": [
+				{
+					"name": "✅ Produto Válido Completo",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201 Created\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Response has all fields\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('id');",
+									"    pm.expect(jsonData).to.have.property('nome');",
+									"    pm.expect(jsonData).to.have.property('descricao');",
+									"    pm.expect(jsonData).to.have.property('preco');",
+									"    pm.expect(jsonData).to.have.property('estoque');",
+									"    pm.expect(jsonData).to.have.property('dataCriacao');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Produto Completamente Válido\",\n  \"descricao\": \"Este produto passa em todas as validações do FluentValidation\",\n  \"preco\": 299.99,\n  \"estoque\": 100\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/produtos",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"produtos"
+							]
+						},
+						"description": "**Teste de caso positivo** - Todos os campos válidos.\n\n✅ Validações que passam:\n- Nome: não vazio, <= 200 chars, não só espaços\n- Descrição: <= 1000 chars\n- Preço: > 0, <= 2 casas decimais\n- Estoque: >= 0"
+					},
+					"response": []
+				},
+				{
+					"name": "✅ Produto Sem Descrição (Válido)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201 Created\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Descrição aceita vazia\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.descricao).to.exist;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Produto Sem Descrição\",\n  \"descricao\": \"\",\n  \"preco\": 99.99,\n  \"estoque\": 50\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/produtos",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"produtos"
+							]
+						},
+						"description": "**Teste**: Descrição é opcional.\n\n✅ Descrição pode ser vazia (não é obrigatória)"
+					},
+					"response": []
+				},
+				{
+					"name": "✅ Produto com Estoque Zero (Válido)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201 Created\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Estoque zero é aceito\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.estoque).to.equal(0);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Produto Sem Estoque\",\n  \"descricao\": \"Produto esgotado\",\n  \"preco\": 199.99,\n  \"estoque\": 0\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/produtos",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"produtos"
+							]
+						},
+						"description": "**Teste**: Estoque pode ser zero.\n\n✅ Regra: estoque >= 0 (aceita zero)"
+					},
+					"response": []
+				},
+				{
+					"name": "❌ Nome: Vazio",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"Error on Nome field\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.errors.Nome).to.exist;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"\",\n  \"descricao\": \"Teste\",\n  \"preco\": 100,\n  \"estoque\": 10\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/produtos",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"produtos"
+							]
+						},
+						"description": "❌ Validação: Nome obrigatório\n\n**Mensagem esperada**: \"O nome do produto é obrigatório.\""
+					},
+					"response": []
+				},
+				{
+					"name": "❌ Nome: Apenas Espaços",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"Error mentions whitespace\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    var nomeError = jsonData.errors.Nome[0];",
+									"    pm.expect(nomeError).to.include('espaços');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"     \",\n  \"descricao\": \"Teste\",\n  \"preco\": 100,\n  \"estoque\": 10\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/produtos",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"produtos"
+							]
+						},
+						"description": "❌ Validação: Nome não pode ser apenas espaços\n\n**Mensagem esperada**: \"O nome do produto não pode conter apenas espaços em branco.\""
+					},
+					"response": []
+				},
+				{
+					"name": "❌ Nome: Excede 200 caracteres",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"Error mentions 200 characters\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    var nomeError = jsonData.errors.Nome[0];",
+									"    pm.expect(nomeError).to.include('200');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"A\".repeat(201),\n  \"descricao\": \"Teste\",\n  \"preco\": 100,\n  \"estoque\": 10\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/produtos",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"produtos"
+							]
+						},
+						"description": "❌ Validação: Nome máximo 200 caracteres\n\n**Mensagem esperada**: \"O nome do produto não pode ter mais de 200 caracteres.\""
+					},
+					"response": []
+				},
+				{
+					"name": "❌ Descrição: Excede 1000 caracteres",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"Error mentions 1000 characters\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.errors.Descricao).to.exist;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Produto\",\n  \"descricao\": \"B\".repeat(1001),\n  \"preco\": 100,\n  \"estoque\": 10\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/produtos",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"produtos"
+							]
+						},
+						"description": "❌ Validação: Descrição máximo 1000 caracteres\n\n**Mensagem esperada**: \"A descrição não pode ter mais de 1000 caracteres.\""
+					},
+					"response": []
+				},
+				{
+					"name": "❌ Preço: Zero",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"Error on Preco field\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.errors.Preco).to.exist;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Produto\",\n  \"descricao\": \"Teste\",\n  \"preco\": 0,\n  \"estoque\": 10\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/produtos",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"produtos"
+							]
+						},
+						"description": "❌ Validação: Preço deve ser > 0\n\n**Mensagem esperada**: \"O preço deve ser maior que zero.\""
+					},
+					"response": []
+				},
+				{
+					"name": "❌ Preço: Negativo",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"Error mentions 'maior que zero'\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    var precoError = jsonData.errors.Preco[0];",
+									"    pm.expect(precoError).to.include('maior que zero');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Produto\",\n  \"descricao\": \"Teste\",\n  \"preco\": -50.00,\n  \"estoque\": 10\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/produtos",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"produtos"
+							]
+						},
+						"description": "❌ Validação: Preço negativo\n\n**Mensagem esperada**: \"O preço deve ser maior que zero.\""
+					},
+					"response": []
+				},
+				{
+					"name": "❌ Preço: Mais de 2 casas decimais",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"Error mentions decimal places\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.errors.Preco).to.exist;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Produto\",\n  \"descricao\": \"Teste\",\n  \"preco\": 99.999,\n  \"estoque\": 10\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/produtos",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"produtos"
+							]
+						},
+						"description": "❌ Validação: Máximo 2 casas decimais\n\n**Mensagem esperada**: \"O preço deve ter no máximo 2 casas decimais...\""
+					},
+					"response": []
+				},
+				{
+					"name": "❌ Estoque: Negativo",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"Error mentions 'não pode ser negativo'\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    var estoqueError = jsonData.errors.Estoque[0];",
+									"    pm.expect(estoqueError).to.include('não pode ser negativo');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Produto\",\n  \"descricao\": \"Teste\",\n  \"preco\": 100,\n  \"estoque\": -10\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/produtos",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"produtos"
+							]
+						},
+						"description": "❌ Validação: Estoque >= 0\n\n**Mensagem esperada**: \"O estoque não pode ser negativo.\""
+					},
+					"response": []
+				},
+				{
+					"name": "❌ Múltiplos Erros Simultâneos",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"Has at least 3 validation errors\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    var errorFields = Object.keys(jsonData.errors);",
+									"    pm.expect(errorFields.length).to.be.at.least(3);",
+									"});",
+									"",
+									"pm.test(\"All validations executed\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.errors.Nome).to.exist;",
+									"    pm.expect(jsonData.errors.Preco).to.exist;",
+									"    pm.expect(jsonData.errors.Estoque).to.exist;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"\",\n  \"descricao\": \"Teste de múltiplos erros\",\n  \"preco\": -100,\n  \"estoque\": -50\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/produtos",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"produtos"
+							]
+						},
+						"description": "❌ Teste: Múltiplos erros de validação\n\n**Comportamento**: FluentValidation executa TODAS as validações, não para no primeiro erro\n\n**Erros esperados**:\n- Nome vazio\n- Preço negativo\n- Estoque negativo"
+					},
+					"response": []
+				}
+			],
+			"description": "**Testes Específicos de FluentValidation**\n\nEsta pasta contém testes organizados para todas as regras de validação implementadas.\n\n**Organização**:\n- ✅ Testes positivos (casos válidos)\n- ❌ Testes negativos (casos inválidos)\n\n**Validadores Testados**:\n- ProdutoCreateDtoValidator\n\n**Regras Validadas**:\n1. **Nome**\n   - ✅ Obrigatório (NotEmpty)\n   - ✅ Máximo 200 caracteres\n   - ✅ Não apenas espaços em branco\n\n2. **Descrição**\n   - ✅ Opcional (pode ser vazio)\n   - ✅ Máximo 1000 caracteres\n\n3. **Preço**\n   - ✅ Obrigatório\n   - ✅ Maior que zero\n   - ✅ Máximo 2 casas decimais\n\n4. **Estoque**\n   - ✅ Obrigatório\n   - ✅ Maior ou igual a zero\n\n**Como usar**:\n1. Execute \"Run folder\" para testar todas as validações\n2. Veja os testes passando/falhando\n3. Use como referência para criar novos validadores\n\n**Formato de Resposta de Erro**:\n```json\n{\n  \"type\": \"https://tools.ietf.org/html/rfc7231#section-6.5.1\",\n  \"title\": \"One or more validation errors occurred.\",\n  \"status\": 400,\n  \"errors\": {\n    \"Campo\": [\"Mensagem de erro em português\"]\n  }\n}\n```"
 		},
 		{
 			"name": "Health Check",

@@ -25,7 +25,7 @@ Este repositório está preparado para o trabalho em grupo. A base é uma API mi
 | 1 - Repository | ⏳ Pendente | - | Aguardando implementação |
 | 2 - Service | ✅ Concluído | `feature/service` | Implementado com validações |
 | 3 - DTO + Mapping | ⏳ Pendente | - | Aguardando implementação |
-| 4 - Validation | ⏳ Pendente | - | Aguardando implementação |
+| 4 - Validation | ✅ Concluído | `main` | FluentValidation implementado |
 | 5 - Factory | ⏳ Pendente | - | Aguardando implementação |
 
 ## Implementação do Service Pattern (Grupo 2)
@@ -55,6 +55,66 @@ Este repositório está preparado para o trabalho em grupo. A base é uma API mi
 - ✅ Usa `IProdutoRepository` (aguardando implementação do grupo Repository)
 - ✅ Usa `ProdutoFactory.Criar()` (aguardando implementação do grupo Factory)
 - ✅ Retorna entidade `Produto` (compatível com grupo DTO/Mapping)
+
+## Implementação do Validation Pattern (Grupo 4)
+
+### ✅ O que foi implementado
+- **FluentValidation**: Biblioteca para validações declarativas e reutilizáveis
+- **Validadores criados**:
+  - `ProdutoCreateDtoValidator` - Validação para criação
+  - `ProdutoUpdateValidator` - Validação para atualização completa (PUT)
+  - `ProdutoPatchValidator` - Validação para atualização parcial (PATCH)
+
+### 🎯 Decisões técnicas tomadas
+
+#### **Separação de Responsabilidades**
+- **Validação de entrada** (FluentValidation) vs **Invariantes de domínio** (entidades)
+- Validadores focam em formato/sintaxe dos dados
+- Regras de negócio complexas permanecem no Service/Domain
+
+#### **Regras de Validação**
+- ✅ Nome: obrigatório, máx 200 caracteres, não apenas espaços
+- ✅ Descrição: opcional, máx 1000 caracteres
+- ✅ Preço: obrigatório, > 0, máx 2 casas decimais
+- ✅ Estoque: obrigatório, >= 0
+
+#### **Integração com Endpoints**
+- Validação automática antes de processar requisições
+- Retorna `ValidationProblem` (RFC 7807) em caso de erros
+- Mensagens de erro em português
+
+#### **Benefícios**
+- ✅ Código mais limpo e testável
+- ✅ Validações centralizadas e reutilizáveis
+- ✅ Mensagens de erro consistentes
+- ✅ Fácil manutenção e extensão
+
+### 📚 Documentação
+- `Application/Validators/README.md` - Explicação completa dos validadores
+- `Application/Validators/ExemplosTestes.md` - Exemplos de testes unitários
+
+## 🧪 Testando a API
+
+### Postman Collection
+A collection do Postman foi atualizada com **testes completos de FluentValidation**:
+
+📦 **APIProdutos.postman_collection.json** (v2.0)
+- ✅ 35+ requests organizados
+- ✅ 15 testes específicos de FluentValidation
+- ✅ Scripts de teste automatizados
+- ✅ Documentação detalhada de cada endpoint
+
+**Pastas na Collection**:
+1. **Produtos** - CRUD completo com validações
+2. **FluentValidation - Testes** ⭐ - Testes organizados por campo
+3. **Health Check** - Verificação de disponibilidade
+
+**Como usar**:
+1. Importar `APIProdutos.postman_collection.json` no Postman
+2. Executar "Run folder" em "FluentValidation - Testes"
+3. Ver todos os testes passarem/falharem automaticamente
+
+📖 Documentação completa: `docs/PostmanCollectionUpdate.md`
 
 ## Ordem Sugerida de Integração
 1. Repository

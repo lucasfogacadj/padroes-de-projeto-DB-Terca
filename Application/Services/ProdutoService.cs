@@ -110,9 +110,11 @@ public class ProdutoService : IProdutoService
             throw new NotImplementedException("produto");
         }
         if (!string.IsNullOrEmpty(produto.Nome))
-        {   produtoEncontrado.Nome = produto.Nome;
+        {   
+            produtoEncontrado.Nome = produto.Nome;
         }
-        if (produto.Preco != null) {
+        if (produto.Preco > 0) 
+        {
             produtoEncontrado.Preco = produto.Preco;
         }
         if (!string.IsNullOrEmpty(produto.Descricao)) {
