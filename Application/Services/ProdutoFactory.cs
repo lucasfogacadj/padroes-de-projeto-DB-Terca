@@ -26,6 +26,7 @@ public static class ProdutoFactory
         Console.WriteLine("Produto validado com sucesso! Criando...");
         Produto produtoValido = new Produto();
         produtoValido.Nome = nome;
+        produtoValido.Descricao = descricao;
         produtoValido.Preco = preco;
         produtoValido.Estoque = estoque;
         produtoValido.DataCriacao = DateTime.Now;

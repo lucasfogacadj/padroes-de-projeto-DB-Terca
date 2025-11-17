@@ -3,6 +3,7 @@ using System.Runtime.Intrinsics.Arm;
 using Application.DTOs;
 using Application.Interfaces;
 using Application.Services;
+using FluentValidation;
 using Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,6 +17,10 @@ builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite("Data S
 builder.Services.AddScoped<IProdutoRepository, ProdutoRepository>();
 
 builder.Services.AddScoped<IProdutoService, ProdutoService>();
+
+//registra os validadores do fluentevalidation
+
+builder.Services.AddValidatorsFromAssemblyContaining<ProdutoCreateDtoValidator>();
 
 
 var app = builder.Build();
@@ -33,8 +38,20 @@ app.MapGet("/produtos/{id}", async (int id, IProdutoService service, Cancellatio
     return produto != null ? Results.Ok(produto) : Results.NotFound();
 });
 //post criar produto
-app.MapPost("/produtos", async (ProdutoCreateDto dto, IProdutoService service, CancellationToken ct) =>
+app.MapPost("/produtos", async (
+    ProdutoCreateDto dto,
+    IProdutoService service,
+    CancellationToken ct,
+    IValidator<ProdutoCreateDto> validator) =>
 {
+    //validar o dto antes de processar 
+    var ResultValidation = await validator.ValidateAsync(dto, ct);
+
+    if (!ResultValidation.IsValid)
+    {
+        return Results.ValidationProblem(ResultValidation.ToDictionary());
+    }
+    
     var produto = await service.CriarAsync(dto.Nome, dto.Descricao, dto.Preco, dto.Estoque, ct);
     return Results.Created($"/produtos/{produto.Id}", produto);
 });

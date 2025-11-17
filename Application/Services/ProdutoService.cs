@@ -112,13 +112,13 @@ public class ProdutoService : IProdutoService
         if (!string.IsNullOrEmpty(produto.Nome))
         {   produtoEncontrado.Nome = produto.Nome;
         }
-        if (produto.Preco != null) {
+        if (produto.Preco > 0) {
             produtoEncontrado.Preco = produto.Preco;
         }
         if (!string.IsNullOrEmpty(produto.Descricao)) {
             produtoEncontrado.Descricao = produto.Descricao;
         }
-        if (produto.Estoque < 0)
+        if (produto.Estoque > 0)
         {
             produtoEncontrado.Estoque = produto.Estoque;
         }       
