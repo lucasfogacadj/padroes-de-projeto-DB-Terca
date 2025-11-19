@@ -33,7 +33,7 @@ public class ProdutoService : IProdutoService
         var produto = await _repo.GetByIdAsync(id, ct);
         if(produto == null)
         {
-            throw new ArgumentException("Ppoduto não encontrado");
+            return null;
         }
         var produtoDTO = MappingExtensions.ToReadDto(produto);
         return produtoDTO;

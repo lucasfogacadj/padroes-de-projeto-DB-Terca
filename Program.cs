@@ -57,14 +57,22 @@ app.MapPost("/produtos", async (
 });
 
 //PUT Atualização completa do produto
-app.MapPut("/produtos/{id}", async (int id, Produto produto, IProdutoService service, CancellationToken ct) =>
+app.MapPut("/produtos/{id}", async (int id, Produto produto, IProdutoService service, CancellationToken ct, IValidator<Produto> validator) =>
 {
+    var validationResult = await validator.ValidateAsync(produto, ct);
+    if (!validationResult.IsValid) return Results.ValidationProblem(validationResult.ToDictionary());
     var produtoAtualizado = await service.AtualizarAsync(id, produto, ct);
     return Results.Ok(produtoAtualizado);
+
 });
 
-app.MapPatch("/produtos/{id}", async (int id, Produto produto, IProdutoService service, CancellationToken ct) =>
+app.MapPatch("/produtos/{id}", async (int id, Produto produto, IProdutoService service, CancellationToken ct, IValidator<Produto> validator) =>
 {
+    var validationResult = await validator.ValidateAsync(produto, ct);
+    if (!validationResult.IsValid)
+    {
+        return Results.ValidationProblem(validationResult.ToDictionary());
+    }
     var produtoAtualizadoParcialmente = await service.AtualizarParcialAsync(id, produto, ct);
     return Results.Ok(produtoAtualizadoParcialmente);
 });

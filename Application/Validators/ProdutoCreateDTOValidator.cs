@@ -18,7 +18,9 @@ public class ProdutoCreateDtoValidator : AbstractValidator<ProdutoCreateDto>
 
         RuleFor(p => p.Preco)
             .GreaterThan(0)
-            .WithMessage("Preço deve ser maior que 0");
+            .WithMessage("Preço deve ser maior que 0")
+            .PrecisionScale(10, 2, ignoreTrailingZeros:true)
+            .WithMessage("Preço deve ter no máximo duas casas decimais e 10 dígitos no total.");
 
         RuleFor(p => p.Estoque)
            .GreaterThanOrEqualTo(0)
